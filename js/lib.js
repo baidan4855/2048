@@ -1,6 +1,6 @@
 GameLib = {
   random: function(max){
-    return Math.floor(Math.random() * max);
+    return Math.floor(Math.random() * max * 100) % max;
   },
   random2or4: function(){
     return Math.random() < 0.8 ? 2 : 4;
@@ -34,7 +34,9 @@ GameLib = {
       })
     })
     for(var i = 0; i < number; i++){
-      var tile = emptyMap[this.random(mapSize * mapSize - currDataMap.length - i)];
+      var randomIndex = this.random(emptyMap.length - i)
+      var tile = emptyMap[randomIndex];
+      emptyMap.splice(randomIndex, 1);
       tile.value = this.random2or4();
       tiles.push(tile)
     }

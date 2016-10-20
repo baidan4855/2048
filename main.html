@@ -13,35 +13,11 @@
     <link href="main.css" rel="stylesheet"></link>
   </head>
   <body>
-
     <script name="references" type="text/babel">
       const { Component, PropTypes } = React
       const { connect, Provider } = ReactRedux
       const { createStore, combineReducers } = Redux
       const { render } = ReactDOM
-    </script>
-    <script name="components" type="text/babel">
-      class GridContainer extends Component{
-        static propTypes = {
-          size: PropTypes.number,
-          cellsCountEachRow: PropTypes.number,
-        }
-        render() {
-          return (
-            <div
-              className="stage"
-              style={{ width: this.props.size, height: this.props.size }}
-            ></div>
-          )
-        }
-      }
-      const gameComponents = {
-        grid:{
-          container:(
-            <div className='grid-container'></div>
-          )
-        }
-      }
     </script>
     <script name="actions" type="text/babel">
       const actionTypes = {
@@ -77,20 +53,82 @@
         }
       }
     </script>
-    <script type="text/babel">
-      const gameReducers = combineReducers({
-        dataMap
+    <script name="components" type="text/babel">
+      const AppComponent = ({width}) => (
+        <div
+          className="stage"
+          style={{ width: width, height: width + 100}}
+        >
+          <TilesGrid />
+        </div>
+      )
+      AppComponent.PropTypes = {
+        width: PropTypes.number
+      }
+      const TilesGridComponent = ({width, size, dataMap}) => {
+        const gapWidth = width / size / 6
+        const tileSize = (width - (size + 1) * gapWidth) / size
+        console.log(width,size,dataMap)
+        return (
+          <div>
+            {dataMap.map((row,x) =>
+              row.map((tile,y) =>
+                <div className="tile" style={{width:tileSize, height:tileSize}}>{x}</div>
+              )
+            )}
+          </div>
+        )
+      }
+      TilesGridComponent.PropTypes = {
+        width: PropTypes.number.isRequired,
+        size: PropTypes.number.isRequired,
+        dataMap: PropTypes.array.isRequired,
+      }
+
+    </script>
+    <script name="containers" type="text/babel">
+      const mapStateToPropsForApp = (state) => ({
+        width: state.width || 400
       })
-      const store = createStore(gameReducers)
+      const App = connect(mapStateToPropsForApp, null)(AppComponent)
+
+      const mapStateToPropsForTilesGrid = (state) => ({
+        width: state.width,
+        size: state.size || 4,
+        dataMap: state.dataMap
+      })
+      const TilesGrid = connect(mapStateToPropsForTilesGrid, null)(TilesGridComponent)
+    </script>
+    <script name="app" type="text/babel">
+      const store = createStore(combineReducers({
+        dataMap
+      }))
+      render(
+        <Provider store={store}>
+          <App />
+        </Provider>,
+        document.body
+      )
     </script>
 
 
     <script type="text/babel">
-      store.dispatch(gameStart(GameLib.createDataMap(5)))
+      var size = 4
+      store.dispatch(gameStart(GameLib.createDataMap(size)))
       chai.expect(store.getState().dataMap).to.be.an.Array
-      chai.expect(store.getState().dataMap).to.have.length(5)
+      chai.expect(store.getState().dataMap).to.have.length(size)
+      var noEmptyArr = []
+      var dm = store.getState().dataMap;
+      for(var x=0; x<dm.length; x++){
+        for(var y=0; y<dm[x].length; y++){
+          dm[x][y] && noEmptyArr.push({x, y, value: dm[x][y]})
+          //console.log(`x:${x}, y:${y}, value:${dm[x][y]}`)
+        }
+      }
+      chai.expect(noEmptyArr).to.be.an.Array
+      chai.expect(noEmptyArr).to.have.length(size)
 
-      console.log('all test passed')
+      console.log('All test passed')
     </script>
   </body>
 </html>

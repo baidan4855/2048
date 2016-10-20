@@ -1,4 +1,9 @@
 .stage {
   margin:0 auto;
   background:#faf8ef;
+  margin-top:50px;
+}
+.tile {
+  background: #fffccc;
+  position:absolute;
 }
