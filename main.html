@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>2048</title>
+    <script src="https://cdn.bootcss.com/react/15.3.2/react.min.js"></script>
+    <script src="https://cdn.bootcss.com/react/15.3.2/react-dom.min.js"></script>
+    <script src="https://cdn.bootcss.com/redux/3.6.0/redux.min.js"></script>
+    <script src="https://cdn.bootcss.com/react-redux/5.0.0-beta.3/redux.min.js"></script>
+    <script src="https://cdn.bootcss.com/babel-standalone/6.17.0/babel.min.js"></script>
+    <script src="https://cdn.bootcss.com/chai/3.5.0/chai.min.js"></script>
+    <script src="js/lib.js"></script>
+    <link href="main.css" rel="stylesheet"></link>
+  </head>
+  <body>
+
+    <script name="references" type="text/babel">
+      const { Component, PropTypes } = React
+      const { connect, Provider } = ReactRedux
+      const { createStore, combineReducers } = Redux
+      const { render } = ReactDOM
+    </script>
+    <script name="components" type="text/babel">
+      class GridContainer extends Component{
+        static propTypes = {
+          size: PropTypes.number,
+          cellsCountEachRow: PropTypes.number,
+        }
+        render() {
+          return (
+            <div
+              className="stage"
+              style={{ width: this.props.size, height: this.props.size }}
+            ></div>
+          )
+        }
+      }
+      const gameComponents = {
+        grid:{
+          container:(
+            <div className='grid-container'></div>
+          )
+        }
+      }
+    </script>
+    <script name="actions" type="text/babel">
+      const actionTypes = {
+        GAME_START: 'GAME_RESTART',
+        GAME_OVER: 'GAME_OVER',
+        ADD_TILE: 'ADD_TILE'
+      }
+      const gameStart = (data) => ({
+        type: actionTypes.GAME_START,
+        data: data
+      })
+      const addTile = (tiles) => ({
+        type: actionTypes.ADD_TILE,
+        tiles: tiles
+      })
+    </script>
+    <script name="reducers" type="text/babel">
+      const dataMap = (state = [], action) => {
+        switch (action.type) {
+          case actionTypes.GAME_START:{
+            return action.data
+          }
+          case actionTypes.ADD_TILE:{
+            const newTiles = action.data
+            let newState = [...state]
+            newTiles.forEach(function(tile){
+              newState[tile.x][tile.y] = tile.value
+            })
+            return newState
+          }
+          default:
+            return state
+        }
+      }
+    </script>
+    <script type="text/babel">
+      const gameReducers = combineReducers({
+        dataMap
+      })
+      const store = createStore(gameReducers)
+    </script>
+
+
+    <script type="text/babel">
+      store.dispatch(gameStart(GameLib.createDataMap(5)))
+      chai.expect(store.getState().dataMap).to.be.an.Array
+      chai.expect(store.getState().dataMap).to.have.length(5)
+
+      console.log('all test passed')
+    </script>
+  </body>
+</html>
