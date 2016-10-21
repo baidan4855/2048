@@ -55,9 +55,9 @@ GameLib = {
   moveTiles: function(map, direction){
     var directionMap = {
       up:   { x: 0,  y: -1 },
-      right:{ x: 1,  y: 0  },
       down: { x: 0,  y: 1  },
-      left: { x: -1, y: 0  }
+      left: { x: -1, y: 0  },
+      right:{ x: 1,  y: 0  }
     }
     var dirVector = directionMap[direction]
     var size = map.length;
@@ -69,14 +69,48 @@ GameLib = {
     dirVector.x===1 && letProcessSimple.x.reverse();
     dirVector.y===1 && letProcessSimple.y.reverse();
 
-    var newMap = [];
+    var draftMap = [];
     for(var x=0; x<size; x++){
-      newMap.push([])
+      draftMap.push([])
       for(var y=0; y<size; y++){
-        newMap[x].push(map[letProcessSimple.x[x]][letProcessSimple.y[y]])
+        draftMap[x].push({
+          origPosition: {
+            x: x,
+            y: y
+          },
+          value: map[letProcessSimple.x[x]][letProcessSimple.y[y]]
+        })
       }
     }
-    
-    return newMap
-  }
+    var moveTile = function(x,y){
+      if(!draftMap[x][y].value)
+        return;
+      for(var index=x,frontIndex=x-1; index>0; index--,frontIndex--){
+        if(!draftMap[frontIndex][y].value){
+          draftMap[x][y].toPosition = draftMap[frontIndex][y].origPosition
+        }
+
+        if(frontIndex==0){
+          draftMap[x][y].cantMove = true;
+        }
+
+
+        if(draftMap[frontIndex][y].value && draftMap[frontIndex][y].value===draftMap[x][y].value){
+          draftMap[x][y].toPosition = draftMap[frontIndex][y].origPosition;
+          draftMap[x][y].newValue *= 2;
+          draftMap[x][y].cantMove = true;
+          draftMap[x][y].cantPlus = true;
+        }
+      }
+    }
+    if(dirVector.x !== 0){
+      for(var col = 0; col < size; col++){
+        for(var row = 1; row < size; row++){
+          draftMap[col][row] = 'TODO'
+        }
+      }
+    }
+    return draftMap
+  },
+
 }
