@@ -8,5 +8,9 @@
   background: #c7bbaf;
   position: absolute;
   display: inline-block;
-  border-radius: 4px
+  border-radius: 4px;
+  font-size:30px;
+  color:#fff;
+  text-align: center;
+  line-height: 90px;
 }

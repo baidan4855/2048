@@ -41,5 +41,24 @@ GameLib = {
       tiles.push(tile)
     }
     return tiles
+  },
+  listenKeyDown: function(callback){
+    document.addEventListener('keydown', function(e){
+      const keyMap = {
+        38: 0, 39: 1, 40: 2, 37: 3,
+        87: 0, 68: 1, 83: 2, 65: 3
+      };
+      directionMap = [
+        { x: 0,  y: -1 },
+        { x: 1,  y: 0  },
+        { x: 0,  y: 1  },
+        { x: -1, y: 0  }
+      ]
+      if (keyMap[e.which] !== undefined)
+       callback(directionMap[keyMap[e.which]])
+    })
+  },
+  moveTiles: function(map, direction){
+
   }
 }

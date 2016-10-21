@@ -21,54 +21,86 @@
     </script>
     <script name="actions" type="text/babel">
       const actionTypes = {
-        GAME_START: 'GAME_RESTART',
+        GAME_RESTART: 'GAME_RESTART',
         GAME_OVER: 'GAME_OVER',
-        ADD_TILE: 'ADD_TILE'
+        ADD_TILE: 'ADD_TILE',
+        SET_GAME_OPTION: 'SET_GAME_OPTION',
+        MOVE_TILES: 'MOVE_TILES'
       }
       const gameStart = (data) => ({
-        type: actionTypes.GAME_START,
-        data: data
+        type: actionTypes.GAME_RESTART,
+        data,
       })
       const addTile = (data) => ({
         type: actionTypes.ADD_TILE,
-        data: data
+        data
+      })
+      const setGameOptions = (options) => ({
+        type: actionTypes.SET_GAME_OPTION,
+        options
+      })
+      const moveTiles = (direction) => ({
+        type: actionTypes.MOVE_TILES,
+        direction
       })
     </script>
+
+
     <script name="reducers" type="text/babel">
-      const dataMap = (state = [], action) => {
-        switch (action.type) {
-          case actionTypes.GAME_START:{
-            return action.data
+      const GameReducers = {
+        dataMap : (state = [], action) => {
+          switch (action.type) {
+            case actionTypes.GAME_RESTART:{
+              return action.data
+            }
+            case actionTypes.ADD_TILE:{
+              const newTiles = action.data
+              let newState = [...state]
+              newTiles.forEach(function(tile){
+                newState[tile.x][tile.y] = tile.value
+              })
+              return newState
+            }
+            case actionTypes.MOVE_TILES:{
+              console.log('action',action)
+              return state
+            }
+            default:
+              return state
           }
-          case actionTypes.ADD_TILE:{
-            const newTiles = action.data
-            let newState = [...state]
-            newTiles.forEach(function(tile){
-              newState[tile.x][tile.y] = tile.value
-            })
-            return newState
+        },
+        options : (state = {width:400, size:4}, action) => {
+          switch (action.type) {
+            case actionTypes.SET_GAME_OPTION:
+              return action.options
+            default:
+              return state
           }
-          default:
-            return state
         }
       }
     </script>
     <script name="components" type="text/babel">
-      const AppComponent = ({width}) => (
-        <div
-          className="stage"
-          style={{ width: width, height: width + 100}}
-        >
-          <TilesGrid />
-        </div>
-      )
+      const AppComponent = ({width, size, onRestart}) => {
+        return (
+          <div>
+            <div>
+              <div className="stage" style={{ width: width, height: width}}>
+                <TilesGrid />
+              </div>
+              <div>
+                <button onClick={e => { onRestart(size) }}>重新开始</button>
+              </div>
+            </div>
+          </div>
+        )
+      }
       AppComponent.PropTypes = {
         width: PropTypes.number
       }
-      const TilesGridComponent = ({width, size, dataMap}) => {
+      const TilesGridComponent = ({options, dataMap}) => {
+        const {width, size} = options
         const gapWidth = width / size / 8
         const tileSize = (width - (size + 1) * gapWidth) / size
-        console.log(width,size,dataMap)
         return (
           <div style={{position:'absolute'}}>
             {dataMap.map((row,x) => {
@@ -91,64 +123,91 @@
         )
       }
       TilesGridComponent.PropTypes = {
-        width: PropTypes.number.isRequired,
-        size: PropTypes.number.isRequired,
+        options: PropTypes.shape({
+          width: PropTypes.number.isRequired,
+          size: PropTypes.number.isRequired
+        }).isRequired,
         dataMap: PropTypes.array.isRequired,
       }
 
     </script>
     <script name="containers" type="text/babel">
-      const mapStateToPropsForApp = (state) => ({
-        width: state.width || 400
-      })
-      const App = connect(mapStateToPropsForApp, null)(AppComponent)
+      const mapStateToPropsForApp = (state) => {
+        return {
+          ...state.options
+        }
+      }
+      const mapDispatchToPropsForApp = (dispatch) => {
+        return {
+          onRestart: (size) => {
+            dispatch(
+              gameStart(GameLib.createDataMap(size))
+            )
+          }
+        }
+      }
+      const App = connect(mapStateToPropsForApp, mapDispatchToPropsForApp)(AppComponent)
 
-      const mapStateToPropsForTilesGrid = (state) => ({
-        width: state.width || 400,
-        size: state.size || 4,
-        dataMap: state.dataMap
-      })
-      const TilesGrid = connect(mapStateToPropsForTilesGrid, null)(TilesGridComponent)
+      const mapStateToPropsForTilesGrid = (state) => {
+        return {
+          options: state.options,
+          dataMap: state.dataMap
+        }
+      }
+      const TilesGrid = connect(mapStateToPropsForTilesGrid)(TilesGridComponent)
     </script>
     <script name="app" type="text/babel">
+      const pOptions = {width:400, size:4}
       const store = createStore(combineReducers({
-        dataMap
-      }))
+        dataMap:GameReducers.dataMap,
+        options:GameReducers.options
+      }), {options:pOptions})
+
+      const { dispatch } = store
+      dispatch(setGameOptions(pOptions))
+      dispatch(gameStart(GameLib.createDataMap(pOptions.size)))
+      GameLib.listenKeyDown(function(direction){
+        dispatch(moveTiles(direction))
+      })
+
       render(
         <Provider store={store}>
           <App />
         </Provider>,
         document.body
       )
+
     </script>
 
 
     <script type="text/babel">
-      const size = 4
-      const getEmptyArr = () => {
-        let noEmptyArr = []
-        const dm = store.getState().dataMap;
-        for(var x=0; x<dm.length; x++){
-          for(var y=0; y<dm[x].length; y++){
-            dm[x][y] && noEmptyArr.push({x, y, value: dm[x][y]})
-            //console.log(`x:${x}, y:${y}, value:${dm[x][y]}`)
+      if(0){
+        const size = 4
+        const getEmptyArr = () => {
+          let noEmptyArr = []
+          const dm = store.getState().dataMap;
+          for(var x=0; x<dm.length; x++){
+            for(var y=0; y<dm[x].length; y++){
+              dm[x][y] && noEmptyArr.push({x, y, value: dm[x][y]})
+              //console.log(`x:${x}, y:${y}, value:${dm[x][y]}`)
+            }
           }
+          return noEmptyArr
         }
-        return noEmptyArr
+
+        store.dispatch(gameStart(GameLib.createDataMap(size)))
+        chai.expect(store.getState().dataMap).to.be.an.Array
+        chai.expect(store.getState().dataMap).to.have.length(size)
+
+        const nea = getEmptyArr()
+        chai.expect(nea).to.be.an.Array
+        chai.expect(nea).to.have.length(size)
+
+        store.dispatch(addTile(GameLib.createTile(size, store.getState().dataMap,1)))
+        const nea1 = getEmptyArr()
+        chai.expect(nea1).to.have.length(size+1)
+        console.log('All test passed')
       }
-
-      store.dispatch(gameStart(GameLib.createDataMap(size)))
-      chai.expect(store.getState().dataMap).to.be.an.Array
-      chai.expect(store.getState().dataMap).to.have.length(size)
-
-      const nea = getEmptyArr()
-      chai.expect(nea).to.be.an.Array
-      chai.expect(nea).to.have.length(size)
-
-      store.dispatch(addTile(GameLib.createTile(size, store.getState().dataMap,1)))
-      const nea1 = getEmptyArr()
-      chai.expect(nea1).to.have.length(size+1)
-      console.log('All test passed')
     </script>
   </body>
 </html>
