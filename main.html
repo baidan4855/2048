@@ -62,8 +62,8 @@
               return newState
             }
             case actionTypes.MOVE_TILES:{
-              console.log('action',action)
-              return state
+              const newMap = GameLib.moveTiles(state, action.direction)
+              return newMap
             }
             default:
               return state

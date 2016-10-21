@@ -3,7 +3,7 @@ GameLib = {
     return Math.floor(Math.random() * max * 100) % max;
   },
   random2or4: function(){
-    return Math.random() < 0.9 ? 2 : 4;
+    return Math.random() < 0.8 ? 2 : 4;
   },
   createDataMap: function(size){
     var map = this.createEmptyMap(size);
@@ -45,20 +45,38 @@ GameLib = {
   listenKeyDown: function(callback){
     document.addEventListener('keydown', function(e){
       const keyMap = {
-        38: 0, 39: 1, 40: 2, 37: 3,
-        87: 0, 68: 1, 83: 2, 65: 3
+        38: 'up', 39: 'right', 40: 'down', 37: 'left',
+        87: 'up', 68: 'right', 83: 'down', 65: 'left'
       };
-      directionMap = [
-        { x: 0,  y: -1 },
-        { x: 1,  y: 0  },
-        { x: 0,  y: 1  },
-        { x: -1, y: 0  }
-      ]
       if (keyMap[e.which] !== undefined)
-       callback(directionMap[keyMap[e.which]])
+       callback(keyMap[e.which])
     })
   },
   moveTiles: function(map, direction){
+    var directionMap = {
+      up:   { x: 0,  y: -1 },
+      right:{ x: 1,  y: 0  },
+      down: { x: 0,  y: 1  },
+      left: { x: -1, y: 0  }
+    }
+    var dirVector = directionMap[direction]
+    var size = map.length;
+    var letProcessSimple = {x: [], y: []};
+    for(var i=0; i<size; i++){
+      letProcessSimple.x.push(i);
+      letProcessSimple.y.push(i);
+    }
+    dirVector.x===1 && letProcessSimple.x.reverse();
+    dirVector.y===1 && letProcessSimple.y.reverse();
 
+    var newMap = [];
+    for(var x=0; x<size; x++){
+      newMap.push([])
+      for(var y=0; y<size; y++){
+        newMap[x].push(map[letProcessSimple.x[x]][letProcessSimple.y[y]])
+      }
+    }
+    
+    return newMap
   }
 }
