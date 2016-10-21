@@ -3,7 +3,7 @@ GameLib = {
     return Math.floor(Math.random() * max * 100) % max;
   },
   random2or4: function(){
-    return Math.random() < 0.8 ? 2 : 4;
+    return Math.random() < 0.9 ? 2 : 4;
   },
   createDataMap: function(size){
     var map = this.createEmptyMap(size);
