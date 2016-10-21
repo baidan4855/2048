@@ -29,9 +29,9 @@
         type: actionTypes.GAME_START,
         data: data
       })
-      const addTile = (tiles) => ({
+      const addTile = (data) => ({
         type: actionTypes.ADD_TILE,
-        tiles: tiles
+        data: data
       })
     </script>
     <script name="reducers" type="text/babel">
@@ -66,16 +66,27 @@
         width: PropTypes.number
       }
       const TilesGridComponent = ({width, size, dataMap}) => {
-        const gapWidth = width / size / 6
+        const gapWidth = width / size / 8
         const tileSize = (width - (size + 1) * gapWidth) / size
         console.log(width,size,dataMap)
         return (
-          <div>
-            {dataMap.map((row,x) =>
-              row.map((tile,y) =>
-                <div className="tile" style={{width:tileSize, height:tileSize}}>{x}</div>
+          <div style={{position:'absolute'}}>
+            {dataMap.map((row,x) => {
+              return (
+                row.map((tile,y) => {
+                  const top = gapWidth + (tileSize + gapWidth) * x
+                  const left = gapWidth + (tileSize + gapWidth) * y
+                  return (
+                    <div className="tile" style={{
+                      width: tileSize,
+                      height: tileSize,
+                      left: left,
+                      top: top
+                    }}>{tile}</div>
+                  )
+                })
               )
-            )}
+            })}
           </div>
         )
       }
@@ -93,7 +104,7 @@
       const App = connect(mapStateToPropsForApp, null)(AppComponent)
 
       const mapStateToPropsForTilesGrid = (state) => ({
-        width: state.width,
+        width: state.width || 400,
         size: state.size || 4,
         dataMap: state.dataMap
       })
@@ -113,21 +124,30 @@
 
 
     <script type="text/babel">
-      var size = 4
+      const size = 4
+      const getEmptyArr = () => {
+        let noEmptyArr = []
+        const dm = store.getState().dataMap;
+        for(var x=0; x<dm.length; x++){
+          for(var y=0; y<dm[x].length; y++){
+            dm[x][y] && noEmptyArr.push({x, y, value: dm[x][y]})
+            //console.log(`x:${x}, y:${y}, value:${dm[x][y]}`)
+          }
+        }
+        return noEmptyArr
+      }
+
       store.dispatch(gameStart(GameLib.createDataMap(size)))
       chai.expect(store.getState().dataMap).to.be.an.Array
       chai.expect(store.getState().dataMap).to.have.length(size)
-      var noEmptyArr = []
-      var dm = store.getState().dataMap;
-      for(var x=0; x<dm.length; x++){
-        for(var y=0; y<dm[x].length; y++){
-          dm[x][y] && noEmptyArr.push({x, y, value: dm[x][y]})
-          //console.log(`x:${x}, y:${y}, value:${dm[x][y]}`)
-        }
-      }
-      chai.expect(noEmptyArr).to.be.an.Array
-      chai.expect(noEmptyArr).to.have.length(size)
 
+      const nea = getEmptyArr()
+      chai.expect(nea).to.be.an.Array
+      chai.expect(nea).to.have.length(size)
+
+      store.dispatch(addTile(GameLib.createTile(size, store.getState().dataMap,1)))
+      const nea1 = getEmptyArr()
+      chai.expect(nea1).to.have.length(size+1)
       console.log('All test passed')
     </script>
   </body>

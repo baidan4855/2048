@@ -1,9 +1,12 @@
 .stage {
   margin:0 auto;
-  background:#faf8ef;
+  background:#bbada0;
   margin-top:50px;
+  border-radius: 6px
 }
 .tile {
-  background: #fffccc;
-  position:absolute;
+  background: #c7bbaf;
+  position: absolute;
+  display: inline-block;
+  border-radius: 4px
 }
