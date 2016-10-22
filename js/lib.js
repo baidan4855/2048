@@ -71,6 +71,7 @@ GameLib = {
     dirVector.x===1 && letProcessSimple.x.reverse();
     dirVector.y===1 && letProcessSimple.y.reverse();
 
+    var locked = [];
     for(var x=0;x<size;x++){
       for(var y=0;y<size;y++){
         var realx=letProcessSimple.x[x], realy=letProcessSimple.y[y];
@@ -82,88 +83,29 @@ GameLib = {
           frontx+=dirVector.x, fronty+=dirVector.y
         ){
           var frontValue = newMap[frontx][fronty];
-          console.log('currLo:',realx,realy,'frontLoc:',frontx,fronty)
-          console.log('currValue:',currValue,'front:',frontValue)
-          if(!currValue || frontValue < 0 || (currValue && frontValue && currValue !== frontValue))
+          var id = 'x'+frontx + 'y' + fronty;
+          if(!currValue || frontValue < 0 || (currValue && frontValue && currValue !== frontValue) || locked.indexOf(id)>-1)
             continue;
           else{
             cantMove && (cantMove = false);
-            newMap[frontx][fronty] = currValue * ((currValue === frontValue)?2:1);
+            if(currValue == frontValue){
+              newMap[frontx][fronty] = currValue * 2
+              locked.push(id)
+            } else {
+              newMap[frontx][fronty] = currValue
+            }
             newMap[frontx-dirVector.x][fronty-dirVector.y] = null;
           }
         }
       }
     }
-
     if(!cantMove)
       return newMap
-
-
-
-
-
-    //
-    //
-    // var letProcessSimple = {x: [], y: []};
-    // for(var i=0; i<size; i++){
-    //   letProcessSimple.x.push(i);
-    //   letProcessSimple.y.push(i);
-    // }
-    // dirVector.x===1 && letProcessSimple.x.reverse();
-    // dirVector.y===1 && letProcessSimple.y.reverse();
-    //
-    // var draftMap = [], newMap=[];
-    // for(var x=0;x<size;x++){
-    //   draftMap.push([])
-    //   newMap.push([])
-    //   for(var y=0;y<size;y++){
-    //     newMap[x].push(null)
-    //     draftMap[x].push({
-    //       origPosition: {
-    //         x: x,
-    //         y: y
-    //       },
-    //       value: map[letProcessSimple.x[x]][letProcessSimple.y[y]]
-    //     })
-    //   }
-    // }
-    //
-    // for(var x = 0; x < size; x++){
-    //   for(var y = 0; y < size; y++){
-    //     if(!draftMap[x][y].value)
-    //       continue;
-    //     if(y == 0){
-    //       if(draftMap[x][y].value){
-    //         draftMap[x][y].toPosition = draftMap[x][y].origPosition
-    //       }
-    //       continue;
-    //     }
-    //     for(var index=y,frontIndex=y-1; index >0; index--,frontIndex--){
-    //       if(draftMap[x][y].value && !draftMap[x][frontIndex].value){
-    //         draftMap[x][y].toPosition = draftMap[x][frontIndex].origPosition
-    //         draftMap[x][frontIndex].value = null;
-    //         var tmp = draftMap[x][y];
-    //         draftMap[x][y] = draftMap[x][frontIndex];
-    //         draftMap[x][frontIndex] = tmp;
-    //         console.log('move', draftMap[x][frontIndex].origPosition, 'to', draftMap[x][frontIndex].toPosition)
-    //       }
-    //
-    //       if(draftMap[x][frontIndex].value && draftMap[x][frontIndex].value===draftMap[x][y].value && !draftMap[x][frontIndex].plusTimes){
-    //         draftMap[x][y].toPosition = draftMap[x][frontIndex].origPosition;
-    //         draftMap[x][y].newValue *= 2;
-    //         draftMap[x][y].plusTimes = 1;
-    //         draftMap[x][frontIndex].value = null;
-    //         var tmp = draftMap[x][y];
-    //         draftMap[x][y] = draftMap[x][frontIndex];
-    //         draftMap[x][frontIndex] = draftMap[x][y];
-    //         console.log('move&plus', draftMap[x][frontIndex].origPosition, 'to', draftMap[x][frontIndex].toPosition)
-    //         break;
-    //       }
-    //     }
-    //
-    //   }
-    // }
-    // return draftMap
+  },
+  isCanMove: function(map) {
+    return this.moveTiles(map,'left')
+        || this.moveTiles(map,'right')
+        || this.moveTiles(map,'up')
+        || this.moveTiles(map,'down')
   }
-
 }

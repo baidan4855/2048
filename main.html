@@ -63,6 +63,10 @@
             }
             case actionTypes.MOVE_TILES:{
               const newMap = GameLib.moveTiles(state, action.direction)
+              if(newMap && GameLib.isCanMove(newMap)){
+                  var tile = addTile(GameLib.createTile(4, newMap, 1)).data[0]
+                  newMap[tile.x][tile.y] = tile.value;
+              }
               return newMap || state
             }
             default:
@@ -97,30 +101,33 @@
       AppComponent.PropTypes = {
         width: PropTypes.number
       }
-      const TilesGridComponent = ({options, dataMap}) => {
-        const {width, size} = options
-        const gapWidth = width / size / 8
-        const tileSize = (width - (size + 1) * gapWidth) / size
-        return (
-          <div style={{position:'absolute'}}>
-            {dataMap.map((row,x) => {
-              return (
-                row.map((tile,y) => {
-                  const top = gapWidth + (tileSize + gapWidth) * y
-                  const left = gapWidth + (tileSize + gapWidth) * x
-                  return (
-                    <div className="tile" style={{
-                      width: tileSize,
-                      height: tileSize,
-                      left: left,
-                      top: top
-                    }}>{tile}</div>
-                  )
-                })
-              )
-            })}
-          </div>
-        )
+      class TilesGridComponent extends Component {
+        render() {
+          const {options, dataMap} = this.props
+          const {width, size} = options
+          const gapWidth = width / size / 8
+          const tileSize = (width - (size + 1) * gapWidth) / size
+          return (
+            <div style={{position:'absolute'}}>
+              {dataMap.map((row,x) => {
+                return (
+                  row.map((tile,y) => {
+                    const top = gapWidth + (tileSize + gapWidth) * y
+                    const left = gapWidth + (tileSize + gapWidth) * x
+                    return (
+                      <div className="tile" style={{
+                        width: tileSize,
+                        height: tileSize,
+                        left: left,
+                        top: top
+                      }}>{tile}</div>
+                    )
+                  })
+                )
+              })}
+            </div>
+          )
+        }
       }
       TilesGridComponent.PropTypes = {
         options: PropTypes.shape({
@@ -128,6 +135,7 @@
           size: PropTypes.number.isRequired
         }).isRequired,
         dataMap: PropTypes.array.isRequired,
+        status: PropTypes.string,
       }
 
     </script>
@@ -154,13 +162,26 @@
           dataMap: state.dataMap
         }
       }
+      //
+      // const mapDispatchToPropsForTilesGrid = (dispatch) => {
+      //   return {
+      //     onRendered: (dataMap, options) => {
+      //       if(GameLib.isCanMove(dataMap)){
+      //         dispatch(
+      //           addTile(GameLib.createTile(options.size, dataMap, 1))
+      //         )
+      //       }
+      //     }
+      //   }
+      // }
       const TilesGrid = connect(mapStateToPropsForTilesGrid)(TilesGridComponent)
     </script>
     <script name="app" type="text/babel">
       const pOptions = {width:400, size:4}
       const store = createStore(combineReducers({
         dataMap:GameReducers.dataMap,
-        options:GameReducers.options
+        options:GameReducers.options,
+        status:GameReducers.status
       }), {options:pOptions})
 
       const { dispatch } = store
