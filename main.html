@@ -63,7 +63,7 @@
             }
             case actionTypes.MOVE_TILES:{
               const newMap = GameLib.moveTiles(state, action.direction)
-              return newMap
+              return newMap || state
             }
             default:
               return state
@@ -106,8 +106,8 @@
             {dataMap.map((row,x) => {
               return (
                 row.map((tile,y) => {
-                  const top = gapWidth + (tileSize + gapWidth) * x
-                  const left = gapWidth + (tileSize + gapWidth) * y
+                  const top = gapWidth + (tileSize + gapWidth) * y
+                  const left = gapWidth + (tileSize + gapWidth) * x
                   return (
                     <div className="tile" style={{
                       width: tileSize,

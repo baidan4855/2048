@@ -53,6 +53,7 @@ GameLib = {
     })
   },
   moveTiles: function(map, direction){
+    var cantMove = true
     var directionMap = {
       up:   { x: 0,  y: -1 },
       down: { x: 0,  y: 1  },
@@ -61,6 +62,7 @@ GameLib = {
     }
     var dirVector = directionMap[direction]
     var size = map.length;
+    var newMap = this.createEmptyMap(size);
     var letProcessSimple = {x: [], y: []};
     for(var i=0; i<size; i++){
       letProcessSimple.x.push(i);
@@ -69,48 +71,99 @@ GameLib = {
     dirVector.x===1 && letProcessSimple.x.reverse();
     dirVector.y===1 && letProcessSimple.y.reverse();
 
-    var draftMap = [];
-    for(var x=0; x<size; x++){
-      draftMap.push([])
-      for(var y=0; y<size; y++){
-        draftMap[x].push({
-          origPosition: {
-            x: x,
-            y: y
-          },
-          value: map[letProcessSimple.x[x]][letProcessSimple.y[y]]
-        })
-      }
-    }
-    var moveTile = function(x,y){
-      if(!draftMap[x][y].value)
-        return;
-      for(var index=x,frontIndex=x-1; index>0; index--,frontIndex--){
-        if(!draftMap[frontIndex][y].value){
-          draftMap[x][y].toPosition = draftMap[frontIndex][y].origPosition
-        }
+    for(var x=0;x<size;x++){
+      for(var y=0;y<size;y++){
+        var realx=letProcessSimple.x[x], realy=letProcessSimple.y[y];
+        var currValue = map[realx][realy];
+        newMap[realx][realy]=currValue;
 
-        if(frontIndex==0){
-          draftMap[x][y].cantMove = true;
-        }
-
-
-        if(draftMap[frontIndex][y].value && draftMap[frontIndex][y].value===draftMap[x][y].value){
-          draftMap[x][y].toPosition = draftMap[frontIndex][y].origPosition;
-          draftMap[x][y].newValue *= 2;
-          draftMap[x][y].cantMove = true;
-          draftMap[x][y].cantPlus = true;
+        for(var frontx=realx+dirVector.x, fronty=realy+dirVector.y;
+          frontx>=0 && frontx<size && fronty>=0 && fronty<size;
+          frontx+=dirVector.x, fronty+=dirVector.y
+        ){
+          var frontValue = newMap[frontx][fronty];
+          console.log('currLo:',realx,realy,'frontLoc:',frontx,fronty)
+          console.log('currValue:',currValue,'front:',frontValue)
+          if(!currValue || frontValue < 0 || (currValue && frontValue && currValue !== frontValue))
+            continue;
+          else{
+            cantMove && (cantMove = false);
+            newMap[frontx][fronty] = currValue * ((currValue === frontValue)?2:1);
+            newMap[frontx-dirVector.x][fronty-dirVector.y] = null;
+          }
         }
       }
     }
-    if(dirVector.x !== 0){
-      for(var col = 0; col < size; col++){
-        for(var row = 1; row < size; row++){
-          draftMap[col][row] = 'TODO'
-        }
-      }
-    }
-    return draftMap
-  },
+
+    if(!cantMove)
+      return newMap
+
+
+
+
+
+    //
+    //
+    // var letProcessSimple = {x: [], y: []};
+    // for(var i=0; i<size; i++){
+    //   letProcessSimple.x.push(i);
+    //   letProcessSimple.y.push(i);
+    // }
+    // dirVector.x===1 && letProcessSimple.x.reverse();
+    // dirVector.y===1 && letProcessSimple.y.reverse();
+    //
+    // var draftMap = [], newMap=[];
+    // for(var x=0;x<size;x++){
+    //   draftMap.push([])
+    //   newMap.push([])
+    //   for(var y=0;y<size;y++){
+    //     newMap[x].push(null)
+    //     draftMap[x].push({
+    //       origPosition: {
+    //         x: x,
+    //         y: y
+    //       },
+    //       value: map[letProcessSimple.x[x]][letProcessSimple.y[y]]
+    //     })
+    //   }
+    // }
+    //
+    // for(var x = 0; x < size; x++){
+    //   for(var y = 0; y < size; y++){
+    //     if(!draftMap[x][y].value)
+    //       continue;
+    //     if(y == 0){
+    //       if(draftMap[x][y].value){
+    //         draftMap[x][y].toPosition = draftMap[x][y].origPosition
+    //       }
+    //       continue;
+    //     }
+    //     for(var index=y,frontIndex=y-1; index >0; index--,frontIndex--){
+    //       if(draftMap[x][y].value && !draftMap[x][frontIndex].value){
+    //         draftMap[x][y].toPosition = draftMap[x][frontIndex].origPosition
+    //         draftMap[x][frontIndex].value = null;
+    //         var tmp = draftMap[x][y];
+    //         draftMap[x][y] = draftMap[x][frontIndex];
+    //         draftMap[x][frontIndex] = tmp;
+    //         console.log('move', draftMap[x][frontIndex].origPosition, 'to', draftMap[x][frontIndex].toPosition)
+    //       }
+    //
+    //       if(draftMap[x][frontIndex].value && draftMap[x][frontIndex].value===draftMap[x][y].value && !draftMap[x][frontIndex].plusTimes){
+    //         draftMap[x][y].toPosition = draftMap[x][frontIndex].origPosition;
+    //         draftMap[x][y].newValue *= 2;
+    //         draftMap[x][y].plusTimes = 1;
+    //         draftMap[x][frontIndex].value = null;
+    //         var tmp = draftMap[x][y];
+    //         draftMap[x][y] = draftMap[x][frontIndex];
+    //         draftMap[x][frontIndex] = draftMap[x][y];
+    //         console.log('move&plus', draftMap[x][frontIndex].origPosition, 'to', draftMap[x][frontIndex].toPosition)
+    //         break;
+    //       }
+    //     }
+    //
+    //   }
+    // }
+    // return draftMap
+  }
 
 }
