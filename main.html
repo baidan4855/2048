@@ -63,7 +63,7 @@
             }
             case actionTypes.MOVE_TILES:{
               const newMap = GameLib.moveTiles(state, action.direction)
-              if(newMap && GameLib.isCanMove(newMap)){
+              if(newMap && GameLib.canMove(newMap)){
                   var tile = addTile(GameLib.createTile(4, newMap, 1)).data[0]
                   newMap[tile.x][tile.y] = tile.value;
               }

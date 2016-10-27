@@ -85,7 +85,7 @@ GameLib = {
           var frontValue = newMap[frontx][fronty];
           var id = 'x'+frontx + 'y' + fronty;
           if(!currValue || frontValue < 0 || (currValue && frontValue && currValue !== frontValue) || locked.indexOf(id)>-1)
-            continue;
+            break;
           else{
             cantMove && (cantMove = false);
             if(currValue == frontValue){
@@ -102,7 +102,7 @@ GameLib = {
     if(!cantMove)
       return newMap
   },
-  isCanMove: function(map) {
+  canMove: function(map) {
     return this.moveTiles(map,'left')
         || this.moveTiles(map,'right')
         || this.moveTiles(map,'up')
