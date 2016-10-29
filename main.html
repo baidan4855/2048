@@ -58,7 +58,7 @@
               let newState = [...state]
               newTiles.forEach(function(tile){
                 newState[tile.x][tile.y] = tile.value
-              })
+              }) 
               return newState
             }
             case actionTypes.MOVE_TILES:{
