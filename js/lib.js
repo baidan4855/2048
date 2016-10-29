@@ -65,7 +65,7 @@ GameLib = {
     var newMap = this.createEmptyMap(size);
     var letProcessSimple = {x: [], y: []};
     for(var i=0; i<size; i++){
-      letProcessSimple.x.push(i);
+      letProcessSimple.x.push(i); 
       letProcessSimple.y.push(i);
     }
     dirVector.x===1 && letProcessSimple.x.reverse();
